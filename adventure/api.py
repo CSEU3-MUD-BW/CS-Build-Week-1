@@ -26,7 +26,7 @@ def initialize(request):
 # @csrf_exempt
 @api_view(["POST"])
 def move(request):
-    dirs={"n": "north", "s": "south", "e": "east", "w": "west"}
+    dirs ={ "n": "north", "s": "south", "e": "east", "w": "west"}
     reverse_dirs = {"n": "south", "s": "north", "e": "west", "w": "east"}
     player = request.user.player
     player_id = player.id
