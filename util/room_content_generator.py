@@ -28,7 +28,8 @@ rules = {
     'description': [
         'You see ~#setFeatureType.a#~.', #Note: ~tildes~, here, make it possible to scrape features (items) from the room string.
         'You bend over, and spot several ~#setFeatureType.s#~.',
-        'You hear a sound behind you and turn around. At your feet is ~#setFeatureType.a#~.'
+        'You hear a sound behind you and turn around. At your feet is ~#setFeatureType.a#~.',
+        'You smell something strange. Following your nose, you find ~#setFeatureType.a#~ and some ~#setFeatureType.s#~. Odd!'
     ],
 
     'origin': '#[#setRoomName#]title#: #description#'
@@ -37,10 +38,33 @@ rules = {
 grammar = tracery.Grammar(rules)
 grammar.add_modifiers(base_english)
 
-# def scrapeItems(str):
-#     for i in range(len(str)):
-#         item = ''
-        # scraping = 
+def scrapeItems(description):
+    items = []
+
+    scraping = False
+    item = ''
+    for i in range(len(description)):
+        if description[i] == "~":
+            if not scraping:
+                scraping = True
+            else:
+                items.append(item)
+                item = ''
+                scraping = False
+
+        if scraping and description[i] != "~":
+            item += description[i]
+
+    return items
+
+def removeTildes(description):
+    output = ""
+
+    for i in range(len(description)):
+        if description[i] != "~":
+            output += description[i]
+
+    return output
 
 rooms = []
 for i in range(50):
@@ -49,7 +73,8 @@ for i in range(50):
 
     rooms.append({
         'title': splitRoomString[0],
-        'description': splitRoomString[1]
+        'description': removeTildes(splitRoomString[1]),
+        'items': scrapeItems(splitRoomString[1])
     })
 
 print(rooms)
