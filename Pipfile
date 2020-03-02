@@ -4,7 +4,6 @@ verify_ssl = true
 name = "pypi"
 
 [packages]
-django = "*"
 djangorestframework = "*"
 python-decouple = "*"
 django-rest-auth = "*"
@@ -14,8 +13,9 @@ django-cors-headers = "*"
 gunicorn = "*"
 django-heroku = "*"
 django-rest-api = "*"
+django = "*"
 
 [dev-packages]
 
 [requires]
-python_version = "3.7"
+python_version = "3"
