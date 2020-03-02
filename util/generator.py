@@ -54,10 +54,11 @@ def map_creator():
                         room.connectRooms(neighbor, direction)
                         neighbor.connectRooms(room, opposite)
                         connected = True
-    return grid[0][0]
+    return grid
 
 
-ANCHOR_ROOM = map_creator()
+GRID = map_creator()
+ANCHOR_ROOM = GRID[0][0]
 
 PLAYERS = Player.objects.all()
 for p in PLAYERS:
