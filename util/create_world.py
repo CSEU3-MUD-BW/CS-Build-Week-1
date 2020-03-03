@@ -1,28 +1,23 @@
 from random import randint
 from adventure.models import Player, Room
-import tracery
-from tracery.modifiers import base_english
-from room_content import ROOMS
+
 
 Room.objects.all().delete()
-
-basicRoomFeatures = 'panel,light,cable'
-
-
-def grid_populator():
-    grid = [[None] * 10 for x in range(10)]
-    room_count = 0
-    for row, _ in enumerate(grid):
-        for room in range(len(grid[row])):
-            grid[row][room] = Room(
-                title=ROOMS[room_count]['title'],
-                description=ROOMS[room_count]['description'], y=row, x=room)
-            grid[row][room].save()
-            room_count += 1 if room_count < 100 else 0
-    return grid
+ROOMS = [{'title': 'Ransacked Passageway','description': 'You see a smoking cable.', 'items': ['a smoking cable']}]
 
 
 def map_creator():
+    def grid_populator():
+        grid = [[None] * 10 for x in range(10)]
+        room_count = 0
+        for row in range(len(grid)):
+            for room in range(len(grid[row])):
+                grid[row][room] = Room(
+                    title=ROOMS[room_count]['title'], description=ROOMS[room_count]['description'])
+                grid[row][room].save()
+                # room_count += 1
+        return grid
+
     grid = grid_populator()
     for idx_y, row in enumerate(grid):
         for idx_x, room in enumerate(row):
@@ -39,7 +34,6 @@ def map_creator():
             while not connected:
                 for direction in directions:
                     neighbor = ''
-                    opposite = ''
                     if direction == 'n':
                         opposite = 's'
                         neighbor = grid[idx_y - 1][idx_x]
@@ -57,12 +51,10 @@ def map_creator():
                         room.connectRooms(neighbor, direction)
                         neighbor.connectRooms(room, opposite)
                         connected = True
-    return grid
+    return grid[0][0]
 
 
-grid = map_creator()
-anchor_room = grid[0][0]
-
+anchor_room = map_creator()
 players = Player.objects.all()
 
 for p in players:
