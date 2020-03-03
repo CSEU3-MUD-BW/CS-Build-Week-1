@@ -1,5 +1,5 @@
 from random import randint
-from room_content_generator import generate_room_content
+from room_content import generate_room_content
 
 ROOMS = generate_room_content(100)
 
