@@ -19,7 +19,7 @@ class MapWorld:
                     grid[row][room] = Room(
                         title=ROOMS[room_count]['title'], description=ROOMS[room_count]['description'])
                     grid[row][room].save()
-                    # room_count += 1
+                    room_count += 1
             return grid
 
         self.grid = grid_populator()
