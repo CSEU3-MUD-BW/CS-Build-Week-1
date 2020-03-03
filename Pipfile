@@ -19,6 +19,9 @@ pylint-django = "*"
 django = "*"
 sequential = "*"
 tracery = "*"
+psycopg2-binary = "*"
+dj-database-url = "*"
+whitenoise = "*"
 
 [dev-packages]
 
