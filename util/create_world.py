@@ -1,4 +1,3 @@
-"""This is a module method to generate random integers."""
 from random import randint
 from adventure.models import Player, Room
 from room_content_generator import generate_room_content
@@ -9,11 +8,8 @@ ROOMS = generate_room_content(100)
 
 
 def grid_populator():
-    """This generates a 2D array for the grid system and populates it"""
-    # Create a 2D array containing 10 inner lists and 10 items in each
     grid = [[None] * 10 for x in range(10)]
     room_count = 0
-    # Create a 2D array containing 10 inner lists and 10 items in each"""
     for row, _ in enumerate(grid):
         for room in range(len(grid[row])):
             grid[row][room] = Room(
@@ -25,7 +21,6 @@ def grid_populator():
 
 
 def map_creator():
-    """This generates the map by linking rooms via relevant cardinal points"""
     grid = grid_populator()
     for idx_y, row in enumerate(grid):
         for idx_x, room in enumerate(row):
@@ -63,7 +58,6 @@ def map_creator():
 
 
 GRID = map_creator()
-print(GRID)
 ANCHOR_ROOM = GRID[0][0]
 
 PLAYERS = Player.objects.all()
