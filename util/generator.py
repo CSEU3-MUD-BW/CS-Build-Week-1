@@ -11,11 +11,11 @@ def grid_populator():
     # Create a 2D array containing 10 inner lists and 10 items in each
     grid = [[None] * 10 for x in range(10)]
     # Create a 2D array containing 10 inner lists and 10 items in each"""
-    for idx, _ in enumerate(grid):
-        for room in range(len(grid[idx])):
-            grid[idx][room] = Room(
-                title=f"Room {room} Room", description=f"""This is room {room}""")
-            grid[idx][room].save()
+    for row, _ in enumerate(grid):
+        for room in range(len(grid[row])):
+            grid[row][room] = Room(
+                title=f"Room {room} Room", description=f"""This is room {room}""", y=row, x=room)
+            grid[row][room].save()
     return grid
 
 
@@ -36,7 +36,7 @@ def map_creator():
                 directions.remove('e')
             while not connected:
                 for direction in directions:
-                    opposite = ''
+                    neighbor, opposite = '', ''
                     if direction == 'n':
                         opposite = 's'
                         neighbor = grid[idx_y - 1][idx_x]
