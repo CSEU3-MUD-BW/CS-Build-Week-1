@@ -1,47 +1,71 @@
-from django.contrib.auth.models import User
+"""This is a module method to generate random integers."""
+from random import randint
 from adventure.models import Player, Room
-
+from room_content_generator import generate_room_content
 
 Room.objects.all().delete()
 
-r_outside = Room(title="Outside Cave Entrance",
-               description="North of you, the cave mount beckons")
+ROOMS = generate_room_content(100)
 
-r_foyer = Room(title="Foyer", description="""Dim light filters in from the south. Dusty
-passages run north and east.""")
 
-r_overlook = Room(title="Grand Overlook", description="""A steep cliff appears before you, falling
-into the darkness. Ahead to the north, a light flickers in
-the distance, but there is no way across the chasm.""")
+def grid_populator():
+    """This generates a 2D array for the grid system and populates it"""
+    # Create a 2D array containing 10 inner lists and 10 items in each
+    grid = [[None] * 10 for x in range(10)]
+    room_count = 0
+    # Create a 2D array containing 10 inner lists and 10 items in each"""
+    for row, _ in enumerate(grid):
+        for room in range(len(grid[row])):
+            grid[row][room] = Room(
+                title=ROOMS[room_count]['title'], description=ROOMS[room_count]['description'], y=row, x=room)
+            grid[row][room].save()
+            room_count += 1 if room_count < 100 else 0
+    return grid
 
-r_narrow = Room(title="Narrow Passage", description="""The narrow passage bends here from west
-to north. The smell of gold permeates the air.""")
 
-r_treasure = Room(title="Treasure Chamber", description="""You've found the long-lost treasure
-chamber! Sadly, it has already been completely emptied by
-earlier adventurers. The only exit is to the south.""")
+def map_creator():
+    """This generates the map by linking rooms via relevant cardinal points"""
+    grid = grid_populator()
+    for idx_y, row in enumerate(grid):
+        for idx_x, room in enumerate(row):
+            directions = ['n', 's', 'e', 'w']
+            connected = False
+            if idx_y - 1 < 0:
+                directions.remove('n')
+            if idx_y + 1 > len(grid) - 1:
+                directions.remove('s')
+            if idx_x - 1 < 0:
+                directions.remove('w')
+            if idx_x + 1 > len(row) - 1:
+                directions.remove('e')
+            while not connected:
+                for direction in directions:
+                    neighbor, opposite = '', ''
+                    if direction == 'n':
+                        opposite = 's'
+                        neighbor = grid[idx_y - 1][idx_x]
+                    if direction == 'e':
+                        opposite = 'w'
+                        neighbor = grid[idx_y][idx_x + 1]
+                    if direction == 'w':
+                        opposite = 'e'
+                        neighbor = grid[idx_y][idx_x - 1]
+                    if direction == 's':
+                        opposite = 'n'
+                        neighbor = grid[idx_y + 1][idx_x]
+                    connection_decider = randint(0, 1)
+                    if connection_decider:
+                        room.connectRooms(neighbor, direction)
+                        neighbor.connectRooms(room, opposite)
+                        connected = True
+    return grid
 
-r_outside.save()
-r_foyer.save()
-r_overlook.save()
-r_narrow.save()
-r_treasure.save()
 
-# Link rooms together
-r_outside.connectRooms(r_foyer, "n")
-r_foyer.connectRooms(r_outside, "s")
+GRID = map_creator()
+print(GRID)
+ANCHOR_ROOM = GRID[0][0]
 
-r_foyer.connectRooms(r_overlook, "n")
-r_overlook.connectRooms(r_foyer, "s")
-
-r_foyer.connectRooms(r_narrow, "e")
-r_narrow.connectRooms(r_foyer, "w")
-
-r_narrow.connectRooms(r_treasure, "n")
-r_treasure.connectRooms(r_narrow, "s")
-
-players=Player.objects.all()
-for p in players:
-  p.currentRoom=r_outside.id
-  p.save()
-
+PLAYERS = Player.objects.all()
+for p in PLAYERS:
+    p.currentRoom = ANCHOR_ROOM.id
+    p.save()

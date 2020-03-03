@@ -62,6 +62,7 @@ def map_creator():
 
 
 GRID = map_creator()
+print(GRID)
 ANCHOR_ROOM = GRID[0][0]
 
 PLAYERS = Player.objects.all()

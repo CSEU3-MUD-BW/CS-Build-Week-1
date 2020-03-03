@@ -1,9 +1,8 @@
-# Sample Python code that can be used to generate rooms in
-# a zig-zag pattern.
-#
-# You can modify generate_rooms() to create your own
-# procedural generation algorithm and use print_rooms()
-# to see the world.
+from random import randint
+from adventure.models import Player
+from room_content_generator import generate_room_content
+
+ROOMS = generate_room_content(100)
 
 
 class Room:
@@ -17,10 +16,12 @@ class Room:
         self.w_to = None
         self.x = x
         self.y = y
+
     def __repr__(self):
         if self.e_to is not None:
             return f"({self.x}, {self.y}) -> ({self.e_to.x}, {self.e_to.y})"
         return f"({self.x}, {self.y})"
+
     def connect_rooms(self, connecting_room, direction):
         '''
         Connect two rooms in the given n/s/e/w direction
@@ -29,6 +30,7 @@ class Room:
         reverse_dir = reverse_dirs[direction]
         setattr(self, f"{direction}_to", connecting_room)
         setattr(connecting_room, f"{reverse_dir}_to", self)
+
     def get_room_in_direction(self, direction):
         '''
         Connect two rooms in the given n/s/e/w direction
@@ -39,62 +41,62 @@ class Room:
 class World:
     def __init__(self):
         self.grid = None
-        self.width = 0
-        self.height = 0
+        self.width = 10
+        self.height = 10
+
     def generate_rooms(self, size_x, size_y, num_rooms):
-        '''
-        Fill up the grid, bottom to top, in a zig-zag pattern
-        '''
+        def grid_populator():
+            """This generates a 2D array for the grid system and populates it"""
+            # Create a 2D array containing 10 inner lists and 10 items in each
+            grid = [[None] * 10 for x in range(10)]
+            room_count = 0
+            # Create a 2D array containing 10 inner lists and 10 items in each"""
+            for row, _ in enumerate(grid):
+                for room in range(len(grid[row])):
+                    grid[row][room] = Room(id=room_count,
+                                           name=ROOMS[room_count]['title'], description=ROOMS[room_count]['description'], y=row, x=room)
+                    grid[row][room].save()
+                    room_count += 1 if room_count < 100 else 0
+            return grid
 
-        # Initialize the grid
-        self.grid = [None] * size_y
-        self.width = size_x
-        self.height = size_y
-        for i in range( len(self.grid) ):
-            self.grid[i] = [None] * size_x
+        def map_creator():
+            """This generates the map by linking rooms via relevant cardinal points"""
+            grid = grid_populator()
+            for idx_y, row in enumerate(grid):
+                for idx_x, room in enumerate(row):
+                    directions = ['n', 's', 'e', 'w']
+                    connected = False
+                    if idx_y - 1 < 0:
+                        directions.remove('n')
+                    if idx_y + 1 > len(grid) - 1:
+                        directions.remove('s')
+                    if idx_x - 1 < 0:
+                        directions.remove('w')
+                    if idx_x + 1 > len(row) - 1:
+                        directions.remove('e')
+                    while not connected:
+                        for direction in directions:
+                            neighbor, opposite = '', ''
+                            if direction == 'n':
+                                opposite = 's'
+                                neighbor = grid[idx_y - 1][idx_x]
+                            if direction == 'e':
+                                opposite = 'w'
+                                neighbor = grid[idx_y][idx_x + 1]
+                            if direction == 'w':
+                                opposite = 'e'
+                                neighbor = grid[idx_y][idx_x - 1]
+                            if direction == 's':
+                                opposite = 'n'
+                                neighbor = grid[idx_y + 1][idx_x]
+                            connection_decider = randint(0, 1)
+                            if connection_decider:
+                                room.connectRooms(neighbor, direction)
+                                neighbor.connectRooms(room, opposite)
+                                connected = True
+            return grid
 
-        # Start from lower-left corner (0,0)
-        x = -1 # (this will become 0 on the first step)
-        y = 0
-        room_count = 0
-
-        # Start generating rooms to the east
-        direction = 1  # 1: east, -1: west
-
-
-        # While there are rooms to be created...
-        previous_room = None
-        while room_count < num_rooms:
-
-            # Calculate the direction of the room to be created
-            if direction > 0 and x < size_x - 1:
-                room_direction = "e"
-                x += 1
-            elif direction < 0 and x > 0:
-                room_direction = "w"
-                x -= 1
-            else:
-                # If we hit a wall, turn north and reverse direction
-                room_direction = "n"
-                y += 1
-                direction *= -1
-
-            # Create a room in the given direction
-            room = Room(room_count, "A Generic Room", "This is a generic room.", x, y)
-            # Note that in Django, you'll need to save the room after you create it
-
-            # Save the room in the World grid
-            self.grid[y][x] = room
-
-            # Connect the new room to the previous room
-            if previous_room is not None:
-                previous_room.connect_rooms(room, room_direction)
-
-            # Update iteration variables
-            previous_room = room
-            room_count += 1
-
-
+        self.grid = map_creator()
 
     def print_rooms(self):
         '''
@@ -108,7 +110,7 @@ class World:
         # bottom to top.
         #
         # We reverse it so it draws in the right direction.
-        reverse_grid = list(self.grid) # make a copy of the list
+        reverse_grid = list(self.grid)  # make a copy of the list
         reverse_grid.reverse()
         for row in reverse_grid:
             # PRINT NORTH CONNECTION ROW
@@ -159,4 +161,5 @@ w.generate_rooms(width, height, num_rooms)
 w.print_rooms()
 
 
-print(f"\n\nWorld\n  height: {height}\n  width: {width},\n  num_rooms: {num_rooms}\n")
+print(
+    f"\n\nWorld\n  height: {height}\n  width: {width},\n  num_rooms: {num_rooms}\n")
