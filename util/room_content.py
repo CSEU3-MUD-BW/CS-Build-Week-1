@@ -88,4 +88,3 @@ def generate_room_content(n=100):
 
 
 ROOMS = generate_room_content(100)
-print(ROOMS)
