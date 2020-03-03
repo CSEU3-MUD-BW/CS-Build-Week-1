@@ -1,98 +1,9 @@
 from random import randint
 from adventure.models import Player, Room
-import tracery
-from tracery.modifiers import base_english
 
 Room.objects.all().delete()
 
-basicRoomFeatures = 'panel,light,cable'
-
-rules = {
-    'setRoomName': [
-        f'[roomName:room][feature:{basicRoomFeatures}]',
-        f'[roomName:corridor][feature:{basicRoomFeatures}]',
-        f'[roomName:medbay][feature:{basicRoomFeatures},medkit,empty bed]',
-        f'[roomName:armoury][feature:{basicRoomFeatures},phaser,pistol,assault rifle,grenade,odd-looking gun]',
-        f'[roomName:quarters][feature:{basicRoomFeatures},mirror,jewel,family photo]',
-        f'[roomName:bridge][feature:{basicRoomFeatures},chair,flight computer]',
-        f'[roomName:brig][feature:{basicRoomFeatures},force field,handcuff]',
-        f'[roomName:passageway][feature:{basicRoomFeatures},communicator]',
-        f'[roomName:laboratory][feature:{basicRoomFeatures},test tube,centrifuge,lazer]',
-        f'[roomName:mess-hall][feature:{basicRoomFeatures},pot,pan,vegetable,fruit,plate,knife,fork,replicator]',
-        f'[roomName:engine-room][feature:{basicRoomFeatures},pipe,reactor,green gelatinous puddle]',
-    ],
-    'roomAdjective': ['dark', 'smoky', 'dangerous-looking', 'messy', 'quiet', 'irradiated', 'full', 'empty', 'packed', 'stripped', 'ransacked'],
-    'featureAdjective': ['smoking', 'broken', 'flashing', 'beeping', 'oversized', 'odd-looking', 'unfamiliar', 'sharp', 'hot', 'regular'],
-
-    'adverb': ['suspiciously', 'strangely', 'worryingly', 'puzzlingly', 'suprisingly', 'curiously'],
-    'setTitleType': ['#roomAdjective.capitalize#', '#adverb.capitalize# #roomAdjective.capitalize#'],
-    'title': '#setTitleType# #roomName.capitalize#',
-
-    'setFeatureType': ['#feature#', '#featureAdjective# #feature#'],
-    'description': [
-        # Note: ~tildes~, here, make it possible to scrape features (items) from the room string.
-        'You see ~#setFeatureType.a#~.',
-        'You see ~#setFeatureType.a#~. And right next to it, ~#setFeatureType.a#~!',
-        'You bend over, and spot several ~#setFeatureType.s#~.',
-        'You hear a sound behind you and turn around. At your feet is ~#setFeatureType.a#~.',
-        'You smell something strange. Following your nose, you find ~#setFeatureType.a#~ and some ~#setFeatureType.s#~.',
-        'You peek round the door. There\'s nothing in the room but ~#setFeatureType.a#~.',
-        'On the wall you see ~#setFeatureType.a#~. And on the ceiling, ~#setFeatureType.a#~.'
-    ],
-
-    'origin': '#[#setRoomName#]title#: #description#'
-}
-
-grammar = tracery.Grammar(rules)
-grammar.add_modifiers(base_english)
-
-
-def scrapeItems(description):
-    items = []
-
-    scraping = False
-    item = ''
-    for i in range(len(description)):
-        if description[i] == "~":
-            if not scraping:
-                scraping = True
-            else:
-                items.append(item)
-                item = ''
-                scraping = False
-
-        if scraping and description[i] != "~":
-            item += description[i]
-
-    return items
-
-
-def removeTildes(description):
-    output = ""
-
-    for i in range(len(description)):
-        if description[i] != "~":
-            output += description[i]
-
-    return output
-
-
-def generate_room_content(n=100):
-    rooms = []
-    for i in range(n):
-        roomString = grammar.flatten('#origin#')
-        splitRoomString = roomString.split(": ")
-
-        rooms.append({
-            'title': splitRoomString[0],
-            'description': removeTildes(splitRoomString[1]),
-            'items': scrapeItems(splitRoomString[1])
-        })
-
-    return rooms
-
-
-ROOMS = generate_room_content(100)
+ROOMS = [{'title': 'Empty Medbay', 'description': 'You bend over, and spot several hot cables.', 'items': ['hot cables']}, {'title': 'Worryingly Ransacked Laboratory', 'description': "You peek round the door. There's nothing in the room but a cable.", 'items': ['a cable']}, {'title': 'Worryingly Full Mess-hall', 'description': 'You bend over, and spot several regular plates.', 'items': ['regular plates']}, {'title': 'Packed Quarters', 'description': 'You smell something strange. Following your nose, you find a smoking panel and some cables.', 'items': ['a smoking panel', 'cables']}, {'title': 'Stripped Bridge', 'description': 'You see a cable. And right next to it, a light!', 'items': ['a cable', 'a light']}, {'title': 'Messy Laboratory', 'description': 'You bend over, and spot several broken panels.', 'items': ['broken panels']}, {'title': 'Packed Quarters', 'description': 'You see a panel.', 'items': ['a panel']}, {'title': 'Smoky Quarters', 'description': 'You hear a sound behind you and turn around. At your feet is a cable.', 'items': ['a cable']}, {'title': 'Suprisingly Messy Bridge', 'description': 'You smell something strange. Following your nose, you find a flight computer and some flight computers.', 'items': ['a flight computer', 'flight computers']}, {'title': 'Full Engine-room', 'description': 'You see a broken pipe.', 'items': ['a broken pipe']}, {'title': 'Smoky Medbay', 'description': "You peek round the door. There's nothing in the room but a beeping empty bed.", 'items': ['a beeping empty bed']}, {'title': 'Suprisingly Dark Brig', 'description': 'On the wall you see a cable. And on the ceiling, a handcuff.', 'items': ['a cable', 'a handcuff']}, {'title': 'Quiet Room', 'description': 'On the wall you see an odd-looking panel. And on the ceiling, a beeping light.', 'items': ['an odd-looking panel', 'a beeping light']}, {'title': 'Packed Engine-room', 'description': 'You hear a sound behind you and turn around. At your feet is a broken light.', 'items': ['a broken light']}, {'title': 'Full Engine-room', 'description': "You peek round the door. There's nothing in the room but a regular pipe.", 'items': ['a regular pipe']}, {'title': 'Strangely Packed Brig', 'description': 'You hear a sound behind you and turn around. At your feet is a light.', 'items': ['a light']}, {'title': 'Strangely Packed Laboratory', 'description': 'You bend over, and spot several lights.', 'items': ['lights']}, {'title': 'Full Brig', 'description': 'You hear a sound behind you and turn around. At your feet is a cable.', 'items': ['a cable']}, {'title': 'Packed Bridge', 'description': 'You see a cable.', 'items': ['a cable']}, {'title': 'Smoky Bridge', 'description': 'You smell something strange. Following your nose, you find a light and some oversized lights.', 'items': ['a light', 'oversized lights']}, {'title': 'Irradiated Room', 'description': 'On the wall you see a light. And on the ceiling, a panel.', 'items': ['a light', 'a panel']}, {'title': 'Puzzlingly Ransacked Corridor', 'description': 'You hear a sound behind you and turn around. At your feet is a light.', 'items': ['a light']}, {'title': 'Suspiciously Messy Mess-hall', 'description': "You peek round the door. There's nothing in the room but a light.", 'items': ['a light']}, {'title': 'Suspiciously Dangerous-looking Bridge', 'description': "You peek round the door. There's nothing in the room but an oversized flight computer.", 'items': ['an oversized flight computer']}, {'title': 'Suprisingly Packed Armoury', 'description': 'You see a light.', 'items': ['a light']}, {'title': 'Puzzlingly Dangerous-looking Medbay', 'description': 'You see a hot cable.', 'items': ['a hot cable']}, {'title': 'Dangerous-looking Passageway', 'description': 'You smell something strange. Following your nose, you find a light and some oversized lights.', 'items': ['a light', 'oversized lights']}, {'title': 'Strangely Quiet Laboratory', 'description': 'You see a centrifuge. And right next to it, a test tube!', 'items': ['a centrifuge', 'a test tube']}, {'title': 'Ransacked Mess-hall', 'description': 'On the wall you see a replicator. And on the ceiling, a cable.', 'items': ['a replicator', 'a cable']}, {'title': 'Curiously Stripped Mess-hall', 'description': 'On the wall you see a plate. And on the ceiling, a replicator.', 'items': ['a plate', 'a replicator']}, {'title': 'Stripped Corridor', 'description': 'You see a cable. And right next to it, a sharp panel!', 'items': ['a cable', 'a sharp panel']}, {'title': 'Smoky Bridge', 'description': 'You see a hot chair.', 'items': ['a hot chair']}, {'title': 'Curiously Full Engine-room', 'description': 'You hear a sound behind you and turn around. At your feet is a flashing light.', 'items': ['a flashing light']}, {'title': 'Strangely Empty Passageway', 'description': 'On the wall you see a regular communicator. And on the ceiling, a cable.', 'items': ['a regular communicator', 'a cable']}, {'title': 'Suspiciously Full Mess-hall', 'description': 'You see a flashing fruit. And right next to it, a plate!', 'items': ['a flashing fruit', 'a plate']}, {'title': 'Ransacked Passageway', 'description': 'You see a smoking communicator.', 'items': ['a smoking communicator']}, {'title': 'Curiously Irradiated Brig', 'description': 'On the wall you see a panel. And on the ceiling, a beeping handcuff.', 'items': ['a panel', 'a beeping handcuff']}, {'title': 'Ransacked Brig', 'description': 'You bend over, and spot several oversized panels.', 'items': ['oversized panels']}, {'title': 'Ransacked Bridge', 'description': "You peek round the door. There's nothing in the room but a chair.", 'items': ['a chair']}, {'title': 'Dark Passageway', 'description': 'On the wall you see a cable. And on the ceiling, a smoking cable.', 'items': ['a cable', 'a smoking cable']}, {'title': 'Full Mess-hall', 'description': 'On the wall you see a pot. And on the ceiling, an oversized cable.', 'items': ['a pot', 'an oversized cable']}, {'title': 'Dark Armoury', 'description': 'On the wall you see a pistol. And on the ceiling, an assault rifle.', 'items': ['a pistol', 'an assault rifle']}, {'title': 'Smoky Medbay', 'description': 'On the wall you see a sharp panel. And on the ceiling, an empty bed.', 'items': ['a sharp panel', 'an empty bed']}, {'title': 'Puzzlingly Packed Room', 'description': 'You bend over, and spot several sharp panels.', 'items': ['sharp panels']}, {'title': 'Strangely Packed Room', 'description': 'You see a broken cable.', 'items': ['a broken cable']}, {'title': 'Curiously Dangerous-looking Room', 'description': "You peek round the door. There's nothing in the room but a smoking light.", 'items': ['a smoking light']}, {'title': 'Dark Room', 'description': 'You see a sharp cable.', 'items': ['a sharp cable']}, {'title': 'Dangerous-looking Medbay', 'description': 'You see a medkit.', 'items': ['a medkit']}, {'title': 'Strangely Stripped Mess-hall', 'description': 'You hear a sound behind you and turn around. At your feet is an oversized pan.', 'items': ['an oversized pan']}, {'title': 'Suprisingly Stripped Room', 'description': 'On the wall you see a panel. And on the ceiling, a smoking cable.', 'items': ['a panel', 'a smoking cable']}, {'title': 'Suprisingly Messy Armoury', 'description': "You peek round the door. There's nothing in the room but a smoking grenade.", 'items': ['a smoking grenade']}, {'title': 'Dangerous-looking Armoury', 'description': 'You smell something strange. Following your nose, you find an odd-looking assault rifle and some odd-looking assault rifles.', 'items': ['an odd-looking assault rifle', 'odd-looking assault rifles']}, {'title': 'Irradiated Laboratory', 'description': 'You see an unfamiliar test tube. And right next to it, a lazer!', 'items': ['an unfamiliar test tube', 'a lazer']}, {'title': 'Empty Corridor', 'description': 'You see a flashing light. And right next to it, a light!', 'items': ['a flashing light', 'a light']}, {'title': 'Puzzlingly Ransacked Room', 'description': 'You see an unfamiliar panel.', 'items': ['an unfamiliar panel']}, {'title': 'Dark Bridge', 'description': 'You see a hot cable.', 'items': ['a hot cable']}, {'title': 'Puzzlingly Quiet Laboratory', 'description': 'You see a broken cable. And right next to it, a beeping lazer!', 'items': ['a broken cable', 'a beeping lazer']}, {'title': 'Puzzlingly Dark Mess-hall', 'description': 'On the wall you see a hot knife. And on the ceiling, an oversized pan.', 'items': ['a hot knife', 'an oversized pan']}, {'title': 'Smoky Armoury', 'description': 'You see an assault rifle.', 'items': ['an assault rifle']}, {'title': 'Puzzlingly Smoky Bridge', 'description': 'On the wall you see a light. And on the ceiling, a flashing flight computer.', 'items': ['a light', 'a flashing flight computer']}, {'title': 'Messy Room', 'description': 'On the wall you see a cable. And on the ceiling, a regular panel.', 'items': ['a cable', 'a regular panel']}, {'title': 'Strangely Ransacked Laboratory', 'description': 'You hear a sound behind you and turn around. At your feet is an oversized centrifuge.', 'items': ['an oversized centrifuge']}, {'title': 'Messy Brig', 'description': "You peek round the door. There's nothing in the room but a force field.", 'items': ['a force field']}, {'title': 'Empty Brig', 'description': 'You hear a sound behind you and turn around. At your feet is a force field.', 'items': ['a force field']}, {'title': 'Messy Armoury', 'description': "You peek round the door. There's nothing in the room but a panel.", 'items': ['a panel']}, {'title': 'Suspiciously Packed Engine-room', 'description': "You peek round the door. There's nothing in the room but an unfamiliar pipe.", 'items': ['an unfamiliar pipe']}, {'title': 'Suspiciously Dangerous-looking Passageway', 'description': 'You smell something strange. Following your nose, you find a communicator and some cables.', 'items': ['a communicator', 'cables']}, {'title': 'Packed Armoury', 'description': 'You see a broken assault rifle. And right next to it, an oversized light!', 'items': ['a broken assault rifle', 'an oversized light']}, {'title': 'Suspiciously Messy Quarters', 'description': 'On the wall you see a panel. And on the ceiling, a cable.', 'items': ['a panel', 'a cable']}, {'title': 'Stripped Corridor', 'description': 'You bend over, and spot several lights.', 'items': ['lights']}, {'title': 'Irradiated Engine-room', 'description': 'On the wall you see a reactor. And on the ceiling, an oversized cable.', 'items': ['a reactor', 'an oversized cable']}, {'title': 'Suprisingly Packed Quarters', 'description': 'On the wall you see a regular mirror. And on the ceiling, a flashing panel.', 'items': ['a regular mirror', 'a flashing panel']}, {'title': 'Worryingly Dangerous-looking Laboratory', 'description': 'You see a cable.', 'items': ['a cable']}, {'title': 'Irradiated Engine-room', 'description': 'You bend over, and spot several cables.', 'items': ['cables']}, {'title': 'Messy Laboratory', 'description': 'You smell something strange. Following your nose, you find a centrifuge and some flashing panels.', 'items': ['a centrifuge', 'flashing panels']}, {'title': 'Full Laboratory', 'description': 'You see an unfamiliar centrifuge.', 'items': ['an unfamiliar centrifuge']}, {'title': 'Suprisingly Stripped Laboratory', 'description': 'You see a beeping cable. And right next to it, a panel!', 'items': ['a beeping cable', 'a panel']}, {'title': 'Suspiciously Smoky Corridor', 'description': 'You smell something strange. Following your nose, you find a beeping light and some broken panels.', 'items': ['a beeping light', 'broken panels']}, {'title': 'Dangerous-looking Armoury', 'description': 'On the wall you see an odd-looking gun. And on the ceiling, a sharp grenade.', 'items': ['an odd-looking gun', 'a sharp grenade']}, {'title': 'Suprisingly Smoky Room', 'description': 'On the wall you see an odd-looking light. And on the ceiling, a cable.', 'items': ['an odd-looking light', 'a cable']}, {'title': 'Curiously Stripped Armoury', 'description': 'You see a phaser. And right next to it, a hot cable!', 'items': ['a phaser', 'a hot cable']}, {'title': 'Puzzlingly Empty Engine-room', 'description': 'You smell something strange. Following your nose, you find a hot cable and some pipes.', 'items': ['a hot cable', 'pipes']}, {'title': 'Dangerous-looking Medbay', 'description': 'You see a cable. And right next to it, a cable!', 'items': ['a cable', 'a cable']}, {'title': 'Quiet Room', 'description': 'You see a broken cable. And right next to it, a smoking cable!', 'items': ['a broken cable', 'a smoking cable']}, {'title': 'Empty Room', 'description': "You peek round the door. There's nothing in the room but a regular light.", 'items': ['a regular light']}, {'title': 'Packed Brig', 'description': "You peek round the door. There's nothing in the room but a regular panel.", 'items': ['a regular panel']}, {'title': 'Suprisingly Stripped Quarters', 'description': 'You see a family photo.', 'items': ['a family photo']}, {'title': 'Ransacked Engine-room', 'description': 'On the wall you see a reactor. And on the ceiling, a flashing light.', 'items': ['a reactor', 'a flashing light']}, {'title': 'Ransacked Quarters', 'description': 'You bend over, and spot several jewels.', 'items': ['jewels']}, {'title': 'Dangerous-looking Medbay', 'description': 'You hear a sound behind you and turn around. At your feet is an unfamiliar empty bed.', 'items': ['an unfamiliar empty bed']}, {'title': 'Dangerous-looking Laboratory', 'description': 'On the wall you see an odd-looking centrifuge. And on the ceiling, a smoking cable.', 'items': ['an odd-looking centrifuge', 'a smoking cable']}, {'title': 'Irradiated Armoury', 'description': 'You see a flashing panel.', 'items': ['a flashing panel']}, {'title': 'Smoky Quarters', 'description': "You peek round the door. There's nothing in the room but a light.", 'items': ['a light']}, {'title': 'Suspiciously Messy Medbay', 'description': "You peek round the door. There's nothing in the room but a broken cable.", 'items': ['a broken cable']}, {'title': 'Suspiciously Messy Laboratory', 'description': 'You see a smoking test tube. And right next to it, an odd-looking light!', 'items': ['a smoking test tube', 'an odd-looking light']}, {'title': 'Ransacked Engine-room', 'description': 'You see a reactor. And right next to it, a cable!', 'items': ['a reactor', 'a cable']}, {'title': 'Full Room', 'description': 'You see a broken panel. And right next to it, a light!', 'items': ['a broken panel', 'a light']}, {'title': 'Packed Engine-room', 'description': 'You hear a sound behind you and turn around. At your feet is a flashing panel.', 'items': ['a flashing panel']}, {'title': 'Quiet Passageway', 'description': 'On the wall you see a light. And on the ceiling, a cable.', 'items': ['a light', 'a cable']}, {'title': 'Puzzlingly Dangerous-looking Mess-hall', 'description': 'You see a pot. And right next to it, a pan!', 'items': ['a pot', 'a pan']}]
 
 
 def grid_populator():
