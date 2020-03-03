@@ -1,5 +1,4 @@
 from random import randint
-from adventure.models import Player
 from room_content_generator import generate_room_content
 
 ROOMS = generate_room_content(100)
@@ -55,7 +54,6 @@ class World:
                 for room in range(len(grid[row])):
                     grid[row][room] = Room(id=room_count,
                                            name=ROOMS[room_count]['title'], description=ROOMS[room_count]['description'], y=row, x=room)
-                    grid[row][room].save()
                     room_count += 1 if room_count < 100 else 0
             return grid
 
@@ -91,8 +89,8 @@ class World:
                                 neighbor = grid[idx_y + 1][idx_x]
                             connection_decider = randint(0, 1)
                             if connection_decider:
-                                room.connectRooms(neighbor, direction)
-                                neighbor.connectRooms(room, opposite)
+                                room.connect_rooms(neighbor, direction)
+                                neighbor.connect_rooms(room, opposite)
                                 connected = True
             return grid
 
