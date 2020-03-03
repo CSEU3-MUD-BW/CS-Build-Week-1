@@ -18,6 +18,7 @@ pylint = "*"
 pylint-django = "*"
 django = "*"
 sequential = "*"
+tracery = "*"
 
 [dev-packages]
 

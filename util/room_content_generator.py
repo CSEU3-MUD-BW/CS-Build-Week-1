@@ -6,7 +6,7 @@ basicRoomFeatures = 'panel,light,cable'
 rules = {
     'setRoomName': [
         f'[roomName:room][feature:{basicRoomFeatures}]',
-        f'[roomName:corridor][feature:{basicRoomFeatures}]', 
+        f'[roomName:corridor][feature:{basicRoomFeatures}]',
         f'[roomName:medbay][feature:{basicRoomFeatures},medkit,empty bed]',
         f'[roomName:armoury][feature:{basicRoomFeatures},phaser,pistol,assault rifle,grenade,odd-looking gun]',
         f'[roomName:quarters][feature:{basicRoomFeatures},mirror,jewel,family photo]',
@@ -26,7 +26,8 @@ rules = {
 
     'setFeatureType': ['#feature#', '#featureAdjective# #feature#'],
     'description': [
-        'You see ~#setFeatureType.a#~.', #Note: ~tildes~, here, make it possible to scrape features (items) from the room string.
+        # Note: ~tildes~, here, make it possible to scrape features (items) from the room string.
+        'You see ~#setFeatureType.a#~.',
         'You see ~#setFeatureType.a#~. And right next to it, ~#setFeatureType.a#~!',
         'You bend over, and spot several ~#setFeatureType.s#~.',
         'You hear a sound behind you and turn around. At your feet is ~#setFeatureType.a#~.',
@@ -36,10 +37,11 @@ rules = {
     ],
 
     'origin': '#[#setRoomName#]title#: #description#'
-    }
+}
 
 grammar = tracery.Grammar(rules)
 grammar.add_modifiers(base_english)
+
 
 def scrapeItems(description):
     items = []
@@ -60,6 +62,7 @@ def scrapeItems(description):
 
     return items
 
+
 def removeTildes(description):
     output = ""
 
@@ -68,6 +71,7 @@ def removeTildes(description):
             output += description[i]
 
     return output
+
 
 def generate_room_content(n=100):
     rooms = []
@@ -83,4 +87,5 @@ def generate_room_content(n=100):
 
     return rooms
 
-# print(generate_room_content(100))
+
+print(generate_room_content(100))
