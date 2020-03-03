@@ -1,21 +1,25 @@
 """This is a module method to generate random integers."""
 from random import randint
 from adventure.models import Player, Room
-
+from room_content_generator import generate_room_content
 
 Room.objects.all().delete()
+
+ROOMS = generate_room_content(100)
 
 
 def grid_populator():
     """This generates a 2D array for the grid system and populates it"""
     # Create a 2D array containing 10 inner lists and 10 items in each
     grid = [[None] * 10 for x in range(10)]
+    room_count = 0
     # Create a 2D array containing 10 inner lists and 10 items in each"""
     for row, _ in enumerate(grid):
         for room in range(len(grid[row])):
             grid[row][room] = Room(
-                title=f"Room {room} Room", description=f"""This is room {room}""", y=row, x=room)
+                title=ROOMS[room_count]['title'], description=ROOMS[room_count]['description'], y=row, x=room)
             grid[row][room].save()
+            room_count += 1 if room_count < 100 else 0
     return grid
 
 
