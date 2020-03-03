@@ -17,7 +17,8 @@ def grid_populator():
     for row, _ in enumerate(grid):
         for room in range(len(grid[row])):
             grid[row][room] = Room(
-                title=ROOMS[room_count]['title'], description=ROOMS[room_count]['description'], y=row, x=room)
+                title=ROOMS[room_count]['title'],
+                description=ROOMS[room_count]['description'], y=row, x=room)
             grid[row][room].save()
             room_count += 1 if room_count < 100 else 0
     return grid
