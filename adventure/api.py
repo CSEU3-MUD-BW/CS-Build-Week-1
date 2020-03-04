@@ -1,6 +1,6 @@
 from django.shortcuts import render
 from django.views.decorators.csrf import csrf_exempt
-# from pusher import Pusher
+from pusher import Pusher
 from django.http import JsonResponse
 from decouple import config
 from django.contrib.auth.models import User
@@ -76,5 +76,16 @@ def move(request):
 @csrf_exempt
 @api_view(["POST"])
 def say(request):
-    # IMPLEMENT
-    return JsonResponse({'error': "Not yet implemented"}, safe=True, status=500)
+    player = request.user.player
+    player_id = player.user.id
+    player_uuid = player.uuid
+    data = json.loads(request.body)
+    message = data['message']
+    room = player.room()
+    player_UUIDs = room.player_UUIDs(player_id)
+    for p_uuid in player_UUIDs:
+        pusher.trigger(f'p-channel-{p_uuid}', u'broadcast',
+                       {'message': f'{player.user.username} says: {message}'})
+
+    players = room.player_usernames(player_uuid)
+    return JsonResponse({'name': player.user.username, 'title': room.title, 'description': room.description, 'players': players, 'message': message}, safe=True)
